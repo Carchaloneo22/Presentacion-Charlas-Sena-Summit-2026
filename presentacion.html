@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>El futuro se programa · Salidas del desarrollador moderno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     SISTEMA DE DISEÑO  ·  Verde SENA sobre fondo oscuro
+     ============================================================ */
+  :root {
+    --sena:        #39A900;
+    --sena-bright: #5FD400;
+    --sena-neon:   #8BFF3D;
+    --sena-deep:   #1E5A00;
+
+    --bg:   #070B07;
+    --bg-2: #0C120C;
+    --bg-3: #121A12;
+    --stroke:   rgba(139, 255, 61, 0.14);
+    --stroke-2: rgba(139, 255, 61, 0.30);
+
+    --text:      #EAF3E7;
+    --text-soft: #B4C6AE;
+    --text-mute: #6E836A;
+
+    --shadow: 0 24px 60px -20px rgba(0,0,0,0.8);
+    --radius: 20px;
+
+    --font-head: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(900px 600px at 15% 0%, rgba(57,169,0,0.15), transparent 60%),
+      radial-gradient(1000px 700px at 100% 100%, rgba(57,169,0,0.10), transparent 55%),
+      linear-gradient(rgba(139,255,61,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,255,61,0.035) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 46px 46px, 46px 46px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ============================================================
+     SLIDES
+     ============================================================ */
+  .deck { position: relative; height: 100%; width: 100%; z-index: 1; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column; justify-content: center;
+    padding: clamp(32px, 6vw, 110px);
+    opacity: 0;
+  }
+  .slide.active { display: flex; animation: slideIn .55s cubic-bezier(.2,.7,.2,1) forwards; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(26px) scale(.99); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .slide.active .reveal { animation: pop .6s cubic-bezier(.2,.7,.2,1) both; }
+  .slide.active .reveal:nth-child(1){animation-delay:.05s}
+  .slide.active .reveal:nth-child(2){animation-delay:.13s}
+  .slide.active .reveal:nth-child(3){animation-delay:.21s}
+  .slide.active .reveal:nth-child(4){animation-delay:.29s}
+  .slide.active .reveal:nth-child(5){animation-delay:.37s}
+  .slide.active .reveal:nth-child(6){animation-delay:.45s}
+  @keyframes pop { from{opacity:0; transform:translateY(18px)} to{opacity:1; transform:translateY(0)} }
+
+  /* Fragmentos: se revelan al avanzar (interactividad) */
+  .frag { opacity: 0; transform: translateY(14px); transition: opacity .5s cubic-bezier(.2,.7,.2,1), transform .5s cubic-bezier(.2,.7,.2,1); pointer-events: none; }
+  .frag.shown { opacity: 1; transform: none; pointer-events: auto; }
+
+  /* ============================================================
+     TIPOGRAFÍA
+     ============================================================ */
+  h1 { font-family: var(--font-head); font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; }
+  h2 { font-family: var(--font-head); font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
+  h3 { font-family: var(--font-head); font-weight: 600; }
+
+  .kicker {
+    display: inline-flex; align-items: center; gap: 14px;
+    font-family: var(--font-head);
+    font-size: clamp(12px, 1.05vw, 15px);
+    font-weight: 600; letter-spacing: .24em; text-transform: uppercase;
+    color: var(--sena-neon); width: fit-content;
+  }
+  .kicker::before {
+    content: ""; width: 30px; height: 2px; border-radius: 2px;
+    background: var(--sena-neon); box-shadow: 0 0 10px var(--sena-neon); flex: none;
+  }
+  .kicker.ico-tag::before { display: none; }
+  .kicker.ico-tag .ki { width: 1.15em; height: 1.15em; stroke-width: 2.2; }
+
+  .lead { font-size: clamp(18px, 2.1vw, 27px); color: var(--text-soft); line-height: 1.5; max-width: 62ch; font-weight: 400; }
+
+  .hl { color: var(--sena-neon); font-weight: 600; }
+  .hl-box { color: var(--bg); background: var(--sena-bright); padding: 0 .28em; border-radius: 6px; font-weight: 700; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
+  /* ICONOS Lucide */
+  .ico { color: var(--sena-neon); width: clamp(30px, 3vw, 42px); height: clamp(30px, 3vw, 42px); stroke-width: 1.75; margin-bottom: 14px; display: block; }
+  .ico-inline { width: 1.05em; height: 1.05em; vertical-align: -0.16em; color: var(--sena-neon); margin-right: .45em; stroke-width: 2; }
+
+  /* ============================================================
+     COMPONENTES
+     ============================================================ */
+  .grid { display: grid; gap: clamp(14px, 1.6vw, 22px); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+
+  .card {
+    background: linear-gradient(160deg, var(--bg-3), var(--bg-2));
+    border: 1px solid var(--stroke); border-radius: var(--radius);
+    padding: clamp(16px, 1.7vw, 26px);
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .card:hover { transform: translateY(-5px); border-color: var(--stroke-2); box-shadow: var(--shadow); }
+  .card h3 { font-size: clamp(16px, 1.45vw, 21px); color: var(--text); margin-bottom: 7px; }
+  .card p  { font-size: clamp(13px, 1.02vw, 15.5px); color: var(--text-soft); line-height: 1.42; }
+  .card .roles { margin-top: 11px; font-size: clamp(12px,.95vw,14px); color: var(--sena-neon); font-weight: 500; }
+  .card .pay { margin-top: 9px; font-size: clamp(12px,.9vw,13.5px); color: var(--text-mute); }
+  .card .kicker { margin-bottom: 12px; }
+  .card .ico { margin-bottom: 10px; }
+
+  ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 15px; max-width: 68ch; }
+  ul.bullets li { position: relative; padding-left: 36px; font-size: clamp(15px, 1.4vw, 21px); color: var(--text-soft); line-height: 1.4; }
+  ul.bullets li::before { content: "→"; position: absolute; left: 0; top: -1px; color: var(--sena-neon); font-weight: 700; font-family: var(--font-head); }
+  ul.bullets li strong { color: var(--text); font-weight: 600; }
+
+  ul.checks { list-style: none; display: flex; flex-direction: column; gap: 13px; }
+  ul.checks li { position: relative; padding-left: 32px; font-size: clamp(14px,1.2vw,18px); color: var(--text-soft); line-height: 1.4; }
+  ul.checks li::before { content: "✓"; position: absolute; left: 0; color: var(--sena-neon); font-weight: 800; }
+  ul.checks li strong { color: var(--text); font-weight: 600; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 3vw, 56px); align-items: center; }
+
+  .stat .num { font-family: var(--font-head); font-weight: 700; font-size: clamp(40px, 6vw, 82px); line-height: 1; color: var(--sena-bright); letter-spacing: -0.03em; }
+  .stat .num svg { width: clamp(44px,5.4vw,74px); height: clamp(44px,5.4vw,74px); stroke-width: 1.6; }
+  .stat .lbl { margin-top: 10px; font-size: clamp(14px, 1.2vw, 18px); color: var(--text-soft); }
+
+  .vs { display:grid; grid-template-columns: 1fr auto 1fr; gap: clamp(16px,2vw,32px); align-items: stretch; }
+  .vs .col { border-radius: var(--radius); padding: clamp(20px,2.2vw,34px); border:1px solid var(--stroke); }
+  .vs .good { background: rgba(139,255,61,0.06); border-color: var(--stroke-2); }
+  .vs .col h3 { font-size: clamp(18px,1.7vw,26px); margin-bottom: 16px; display:flex; align-items:center; color: var(--sena-neon); }
+  .vs .col ul { list-style:none; display:flex; flex-direction:column; gap:12px; }
+  .vs .col li { font-size: clamp(14px,1.15vw,18px); color: var(--text-soft); padding-left: 28px; position: relative; line-height:1.4; }
+  .vs .good li::before { content:"✓"; position:absolute; left:0; color:var(--sena-neon); font-weight:700; }
+  .vs .mid { display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-weight:700; color:var(--text-mute); font-size: clamp(16px,1.4vw,22px); }
+
+  .big-quote { font-family: var(--font-head); font-weight: 700; font-size: clamp(30px, 5.2vw, 74px); line-height: 1.08; letter-spacing: -0.025em; max-width: 20ch; }
+
+  .tag-row { display:flex; flex-wrap:wrap; gap:10px; margin-top: 4px; }
+  .tag { font-size: clamp(12px,1vw,15px); padding: 8px 15px; border-radius: 100px; border:1px solid var(--stroke-2); color: var(--text); background: rgba(139,255,61,0.05); font-weight:500; }
+
+  .step { display:flex; gap: 18px; align-items:flex-start; }
+  .step .n { flex:none; width: clamp(38px,3.4vw,52px); height: clamp(38px,3.4vw,52px); border-radius:14px; display:grid; place-items:center; font-family:var(--font-head); font-weight:700; font-size:clamp(18px,1.6vw,24px); color:var(--bg); background: linear-gradient(135deg,var(--sena-bright),var(--sena)); }
+  .step h3 { font-size: clamp(16px,1.5vw,22px); margin-bottom:4px; }
+  .step p  { font-size: clamp(13px,1.05vw,16px); color: var(--text-soft); line-height:1.4; }
+
+  .skill-head { display:flex; align-items:center; color:var(--sena-neon); font-size: clamp(18px,1.6vw,24px); }
+
+  /* Núcleo transferible */
+  .core-flow { display:grid; grid-template-columns: 1fr auto 1fr; gap: clamp(16px,2.4vw,44px); align-items:center; }
+  .core-flow .arrow { display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--sena-neon); }
+  .core-flow .arrow svg { width: clamp(28px,3vw,44px); height: clamp(28px,3vw,44px); }
+  .core-flow .arrow span { font-family:var(--font-head); font-size:12px; letter-spacing:.15em; text-transform:uppercase; color:var(--text-mute); }
+  .core-card { background: linear-gradient(160deg, var(--bg-3), var(--bg-2)); border:1px solid var(--stroke-2); border-radius: var(--radius); padding: clamp(20px,2.2vw,32px); }
+  .core-card .ico { margin-bottom:14px; }
+  .core-card h3 { font-size: clamp(18px,1.7vw,25px); margin-bottom:16px; color:var(--text); }
+
+  /* Plataformas / oportunidades */
+  .plat { display:flex; gap:14px; align-items:flex-start; }
+  .plat .pico { flex:none; width: clamp(40px,3.4vw,50px); height: clamp(40px,3.4vw,50px); border-radius:13px; display:grid; place-items:center; background: rgba(139,255,61,0.07); border:1px solid var(--stroke); }
+  .plat .pico svg { width: 55%; height: 55%; color: var(--sena-neon); stroke-width: 2; }
+  .plat .pt { font-family: var(--font-head); font-weight:600; font-size: clamp(15px,1.35vw,20px); color: var(--text); }
+  .plat .pt b { color: var(--sena-neon); }
+  .plat .pd { font-size: clamp(12.5px,1.02vw,15px); color: var(--text-soft); line-height:1.38; margin-top:3px; }
+
+  /* Pregunta al aire */
+  .slide.ask { justify-content: center; }
+  .ask .ask-q { font-family: var(--font-head); font-weight: 700; font-size: clamp(30px, 5.4vw, 78px); line-height: 1.08; letter-spacing: -0.025em; max-width: 22ch; margin-top: 26px; }
+  .ask .ask-hint { margin-top: 30px; font-family: var(--font-head); font-size: clamp(13px,1.1vw,16px); letter-spacing:.1em; text-transform:uppercase; color: var(--text-mute); display:flex; align-items:center; gap:10px; }
+  .ask .ask-hint svg { width:18px; height:18px; color: var(--sena-neon); }
+  .ask .ask-answer { margin-top: 34px; font-size: clamp(18px, 2.1vw, 28px); color: var(--text-soft); line-height:1.45; max-width: 58ch; border-left: 3px solid var(--sena); padding-left: 22px; }
+
+  /* PORTADA / CIERRE */
+  .cover h1 { font-size: clamp(40px, 7.4vw, 116px); }
+  .cover .sub { font-size: clamp(18px, 2.2vw, 30px); color: var(--text-soft); margin-top: 24px; max-width: 40ch; }
+  .cover .cover-foot { margin-top: 40px; font-family: var(--font-head); font-weight: 600; font-size: clamp(17px, 1.8vw, 24px); color: var(--text-soft); letter-spacing: -0.01em; }
+
+  .section-num { font-family:var(--font-head); font-weight:700; font-size: clamp(60px,12vw,220px); color: rgba(139,255,61,0.12); line-height:.9; letter-spacing:-.04em; }
+
+  /* HUD */
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: linear-gradient(90deg, var(--sena), var(--sena-neon)); z-index: 50; transition: width .45s cubic-bezier(.2,.7,.2,1); box-shadow: 0 0 14px var(--sena-neon); }
+  .hud { position: fixed; bottom: 22px; right: 26px; z-index: 50; display:flex; align-items:center; gap: 16px; }
+  .counter { font-family: var(--font-head); font-weight: 600; font-size: 15px; color: var(--text-soft); letter-spacing: .05em; }
+  .counter b { color: var(--sena-neon); }
+  .nav-btns { display:flex; gap: 8px; }
+  .nav-btns button { width: 42px; height: 42px; border-radius: 12px; cursor: pointer; background: var(--bg-3); border: 1px solid var(--stroke-2); color: var(--text); display:grid; place-items:center; transition: all .2s; }
+  .nav-btns button svg { width: 20px; height: 20px; }
+  .nav-btns button:hover { background: var(--sena); color: var(--bg); border-color: var(--sena); }
+  .brand { position: fixed; bottom: 22px; left: 26px; z-index: 50; display:flex; align-items:center; gap: 12px; font-family: var(--font-head); font-weight:700; letter-spacing:.02em; font-size: 15px; color: var(--text-soft); }
+  .brand .dot { width: 12px; height: 12px; border-radius: 4px; background: var(--sena); box-shadow: 0 0 12px var(--sena); }
+  .hint { position: fixed; top: 22px; right: 26px; z-index: 50; font-size: 12.5px; color: var(--text-mute); font-family: var(--font-head); letter-spacing: .04em; }
+  .hint kbd { background: var(--bg-3); border:1px solid var(--stroke); border-radius:6px; padding:2px 7px; color: var(--text-soft); font-family: var(--font-head); font-size: 11px; }
+
+  .overview { position: fixed; inset: 0; z-index: 80; background: rgba(4,7,4,0.97); display:none; padding: clamp(24px,4vw,56px); overflow:auto; }
+  .overview.show { display: block; }
+  .overview h2 { font-size: clamp(20px,2.2vw,30px); margin-bottom: 24px; color: var(--text); }
+  .ov-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:16px; }
+  .ov-item { border:1px solid var(--stroke); border-radius:14px; padding:16px; cursor:pointer; background: var(--bg-2); transition: all .2s; min-height: 92px; }
+  .ov-item:hover { border-color: var(--sena); transform: translateY(-3px); }
+  .ov-item .oi-n { font-family:var(--font-head); font-weight:700; color: var(--sena-neon); font-size:13px; }
+  .ov-item .oi-t { margin-top:8px; font-size:14px; color: var(--text-soft); line-height:1.35; }
+
+  @media (max-width: 860px) {
+    .split, .g2, .g3, .g4, .vs, .core-flow { grid-template-columns: 1fr; }
+    .vs .mid, .core-flow .arrow { display:none; }
+    .hint { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="hint">Usa <kbd>←</kbd> <kbd>→</kbd> · <kbd>F</kbd> pantalla completa · <kbd>O</kbd> índice</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · PORTADA -->
+  <section class="slide cover" data-title="Portada">
+    <span class="kicker reveal">Conferencia · Tecnólogos ADSO · SENA</span>
+    <h1 class="reveal" style="margin-top:26px">El futuro no se<br>predice. Se <span class="hl">programa.</span></h1>
+    <p class="sub reveal">Todas tus salidas de empleo y de negocio como desarrollador en la era de la IA. <strong style="color:var(--text)">Spoiler: no, no nos van a reemplazar.</strong></p>
+    <p class="cover-foot reveal">Y quien lo programa… <span class="hl">eres tú.</span></p>
+  </section>
+
+  <!-- 2 · PREGUNTA AL AIRE #1 -->
+  <section class="slide ask" data-title="Pregunta · ¿solo web?">
+    <span class="kicker ico-tag reveal"><i data-lucide="megaphone" class="ki"></i> Pregunta a la sala</span>
+    <h2 class="ask-q reveal">¿Cuántos creen que<br>estudiar software es,<br>básicamente, hacer<br><span class="hl">páginas web</span>?</h2>
+    <div class="ask-hint reveal"><i data-lucide="hand"></i> Levanten la mano… ahora avanza para responder</div>
+    <p class="ask-answer frag">La web es apenas <strong style="color:var(--text)">una puerta</strong> de un edificio de cien pisos. Hoy vas a ver el edificio completo.</p>
+  </section>
+
+  <!-- 3 · EL MITO -->
+  <section class="slide" data-title="El gran mito">
+    <div class="split">
+      <div>
+        <span class="kicker reveal">La verdad incómoda</span>
+        <h2 class="reveal" style="font-size:clamp(32px,4.6vw,64px); margin-top:18px">Todo funciona<br>con <span class="hl">software.</span></h2>
+        <p class="lead reveal" style="margin-top:24px">La web es lo más visible porque la usas todos los días. Pero por debajo hay una industria gigante que casi nadie te muestra en primer semestre.</p>
+      </div>
+      <div class="reveal">
+        <div class="card" style="border-color:var(--stroke-2)">
+          <p style="font-size:clamp(15px,1.3vw,19px); color:var(--text-soft); line-height:1.6">Piensa en todo lo que corre software y <strong style="color:var(--text)">no es una página web:</strong></p>
+          <div class="tag-row" style="margin-top:18px">
+            <span class="tag">Aviones</span><span class="tag">Bancos</span><span class="tag">Videojuegos</span><span class="tag">Carros</span><span class="tag">Satélites</span><span class="tag">Salud</span><span class="tag">Fábricas</span><span class="tag">Wearables</span><span class="tag">Robots</span><span class="tag">Telecom</span>
+          </div>
+          <p style="margin-top:20px; color:var(--text-mute); font-size:14px">Todo eso lo construye… gente como tú.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · NÚCLEO TRANSFERIBLE -->
+  <section class="slide" data-title="Nada de lo que aprendes se pierde">
+    <span class="kicker reveal">La idea que lo cambia todo</span>
+    <h2 class="reveal" style="font-size:clamp(28px,4vw,56px); margin-top:14px; margin-bottom:26px">Nada de lo que aprendes<br>se pierde. Todo <span class="hl">se conecta.</span></h2>
+    <div class="core-flow reveal">
+      <div class="core-card">
+        <i data-lucide="sprout" class="ico"></i>
+        <h3>La raíz que siembras en ADSO</h3>
+        <ul class="checks">
+          <li><strong>Lógica</strong> y pensamiento para resolver problemas</li>
+          <li><strong>Algoritmos</strong> y estructuras de datos</li>
+          <li><strong>Programación orientada a objetos</strong></li>
+          <li><strong>Bases de datos</strong> y modelado</li>
+          <li><strong>Git</strong>, buenas prácticas y trabajo en equipo</li>
+        </ul>
+      </div>
+      <div class="arrow">
+        <i data-lucide="move-right"></i>
+        <span>alimenta</span>
+      </div>
+      <div class="core-card" style="background:linear-gradient(160deg, rgba(57,169,0,0.16), rgba(57,169,0,0.05))">
+        <i data-lucide="trees" class="ico"></i>
+        <h3>Las 11 ramas de tu carrera</h3>
+        <p style="font-size:clamp(14px,1.2vw,18px); color:var(--text-soft); line-height:1.5">Web, móvil, videojuegos, IA, ciberseguridad, cloud, IoT… <strong style="color:var(--text)">todas nacen de la misma raíz.</strong></p>
+        <p class="frag" style="margin-top:18px; font-size:clamp(16px,1.5vw,22px); color:var(--text)"><span class="hl-box">El lenguaje cambia. Tu forma de pensar, no.</span></p>
+        <p class="frag" style="margin-top:14px; font-size:clamp(14px,1.15vw,17px); color:var(--text-soft)">Cambiar de rama no es empezar de cero: es aplicar lo mismo en otro lugar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · SECCIÓN 01 -->
+  <section class="slide" data-title="Sección 1 · El mapa">
+    <span class="section-num reveal">01</span>
+    <h2 class="reveal" style="font-size:clamp(34px,5.4vw,80px); margin-top:-10px">Tu mapa de posibilidades</h2>
+    <p class="lead reveal" style="margin-top:20px">11 mundos donde puedes construir tu carrera. No tienes que elegir hoy — solo descubrir que existen.</p>
+  </section>
+
+  <!-- 6 · GRID ESPECIALIDADES -->
+  <section class="slide" data-title="Elige tu especialidad">
+    <span class="kicker reveal">Vista de pájaro</span>
+    <h2 class="reveal" style="font-size:clamp(26px,3.6vw,48px); margin-top:16px; margin-bottom:26px">Once caminos, una misma base</h2>
+    <div class="grid g4 reveal" style="gap:14px">
+      <div class="card"><i data-lucide="globe" class="ico"></i><h3>Web</h3><p>Front, back y fullstack.</p></div>
+      <div class="card"><i data-lucide="smartphone" class="ico"></i><h3>Móvil</h3><p>Android, iOS, multiplataforma.</p></div>
+      <div class="card"><i data-lucide="gamepad-2" class="ico"></i><h3>Videojuegos</h3><p>Motores, gráficos, gameplay.</p></div>
+      <div class="card"><i data-lucide="brain-circuit" class="ico"></i><h3>Datos & IA</h3><p>ML y ciencia de datos.</p></div>
+      <div class="card"><i data-lucide="cloud" class="ico"></i><h3>Cloud & DevOps</h3><p>Infraestructura y despliegue.</p></div>
+      <div class="card"><i data-lucide="shield" class="ico"></i><h3>Ciberseguridad</h3><p>Ataque y defensa.</p></div>
+      <div class="card"><i data-lucide="cpu" class="ico"></i><h3>IoT & Embebidos</h3><p>Hardware + software.</p></div>
+      <div class="card"><i data-lucide="flask-conical" class="ico"></i><h3>QA & Testing</h3><p>Automatización de calidad.</p></div>
+      <div class="card"><i data-lucide="database" class="ico"></i><h3>Datos / DBA</h3><p>Bases de datos y arquitectura.</p></div>
+      <div class="card"><i data-lucide="boxes" class="ico"></i><h3>Blockchain</h3><p>Web3 y contratos.</p></div>
+      <div class="card"><i data-lucide="glasses" class="ico"></i><h3>AR / VR</h3><p>Realidad extendida.</p></div>
+      <div class="card" style="border-color:var(--stroke-2); background:rgba(139,255,61,0.06)"><i data-lucide="sparkles" class="ico"></i><h3>…y más</h3><p>El campo crece cada año.</p></div>
+    </div>
+  </section>
+
+  <!-- 7 · WEB -->
+  <section class="slide" data-title="Desarrollo Web">
+    <span class="kicker reveal">Camino 01 · Desarrollo Web</span>
+    <h2 class="reveal" style="font-size:clamp(28px,3.8vw,52px); margin-top:16px; margin-bottom:24px">La base que ya conoces, en grande</h2>
+    <div class="grid g3 reveal">
+      <div class="card"><i data-lucide="palette" class="ico"></i><h3>Frontend</h3><p>La cara visible: interfaces, experiencia de usuario, animaciones.</p><div class="roles">React · Vue · Angular</div></div>
+      <div class="card"><i data-lucide="server" class="ico"></i><h3>Backend</h3><p>El motor invisible: lógica, APIs, seguridad y bases de datos.</p><div class="roles">Node · Java · Python · C#</div></div>
+      <div class="card"><i data-lucide="layers" class="ico"></i><h3>Fullstack</h3><p>Dominas ambos mundos. El perfil más buscado por startups.</p><div class="roles">El “todoterreno”</div></div>
+    </div>
+    <p class="lead reveal" style="margin-top:26px; font-size:clamp(15px,1.3vw,19px)"><i data-lucide="lightbulb" class="ico-inline"></i>Enorme y bien pagada… pero es solo <span class="hl">1 de 11</span>.</p>
+  </section>
+
+  <!-- 8 · MÓVIL + JUEGOS -->
+  <section class="slide" data-title="Móvil y Videojuegos">
+    <div class="grid g2 reveal" style="align-items:stretch">
+      <div class="card">
+        <i data-lucide="smartphone" class="ico"></i>
+        <span class="kicker">Camino 02 · Móvil</span>
+        <h3 style="font-size:clamp(22px,2.2vw,32px); margin-top:8px">Apps en el bolsillo de millones</h3>
+        <p style="margin-top:12px">Construyes lo que la gente usa cada minuto del día. Un solo desarrollador puede impactar a millones desde su cuarto.</p>
+        <div class="tag-row" style="margin-top:16px"><span class="tag">Kotlin</span><span class="tag">Swift</span><span class="tag">Flutter</span><span class="tag">React Native</span></div>
+        <p class="pay">Roles: Android/iOS Dev · Mobile Lead</p>
+      </div>
+      <div class="card">
+        <i data-lucide="gamepad-2" class="ico"></i>
+        <span class="kicker">Camino 03 · Videojuegos</span>
+        <h3 style="font-size:clamp(22px,2.2vw,32px); margin-top:8px">Programar lo que amas jugar</h3>
+        <p style="margin-top:12px">Física, gráficos, IA de enemigos, redes. La industria gamer mueve <span class="hl">más dinero que el cine y la música juntos</span>.</p>
+        <div class="tag-row" style="margin-top:16px"><span class="tag">Unity (C#)</span><span class="tag">Unreal (C++)</span><span class="tag">Godot</span></div>
+        <p class="pay">Roles: Gameplay · Engine · Graphics Programmer</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · DATOS & IA -->
+  <section class="slide" data-title="Datos e IA">
+    <div class="split">
+      <div>
+        <span class="kicker reveal">Camino 04 · Datos & IA</span>
+        <h2 class="reveal" style="font-size:clamp(28px,3.6vw,50px); margin-top:16px">Enséñale a las máquinas a pensar</h2>
+        <p class="lead reveal" style="margin-top:20px">Aquí no consumes IA: <span class="hl">la construyes</span>. Modelos que predicen, recomiendan, detectan fraude y diagnostican enfermedades.</p>
+        <div class="tag-row reveal" style="margin-top:20px"><span class="tag">Python</span><span class="tag">SQL</span><span class="tag">TensorFlow</span><span class="tag">PyTorch</span></div>
+      </div>
+      <div class="reveal">
+        <ul class="bullets">
+          <li><strong>Data Analyst</strong> — convierte datos en decisiones.</li>
+          <li><strong>Data Scientist</strong> — encuentra patrones ocultos.</li>
+          <li><strong>Machine Learning Engineer</strong> — lleva modelos a producción.</li>
+          <li><strong>AI Engineer</strong> — construye productos con IA.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · CLOUD + CIBER -->
+  <section class="slide" data-title="Cloud, DevOps y Ciberseguridad">
+    <div class="grid g2 reveal" style="align-items:stretch">
+      <div class="card">
+        <i data-lucide="cloud" class="ico"></i>
+        <span class="kicker">Camino 05 · Cloud & DevOps</span>
+        <h3 style="font-size:clamp(22px,2.2vw,32px); margin-top:8px">Los arquitectos invisibles</h3>
+        <p style="margin-top:12px">Haces que el software del mundo funcione, escale y no se caiga. De los perfiles <span class="hl">mejor pagados</span> del sector.</p>
+        <div class="tag-row" style="margin-top:16px"><span class="tag">AWS</span><span class="tag">Docker</span><span class="tag">Kubernetes</span><span class="tag">CI/CD</span></div>
+        <p class="pay">Roles: DevOps · SRE · Cloud Architect</p>
+      </div>
+      <div class="card">
+        <i data-lucide="shield-check" class="ico"></i>
+        <span class="kicker">Camino 06 · Ciberseguridad</span>
+        <h3 style="font-size:clamp(22px,2.2vw,32px); margin-top:8px">Protege el mundo digital</h3>
+        <p style="margin-top:12px">Piensas como atacante para defender. <span class="hl">Déficit mundial de talento</span>: sobran las vacantes.</p>
+        <div class="tag-row" style="margin-top:16px"><span class="tag">Pentesting</span><span class="tag">Blue Team</span><span class="tag">Forense</span></div>
+        <p class="pay">Roles: Ethical Hacker · SOC Analyst</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · IOT + QA -->
+  <section class="slide" data-title="IoT, Embebidos y QA">
+    <div class="grid g2 reveal" style="align-items:stretch">
+      <div class="card">
+        <i data-lucide="cpu" class="ico"></i>
+        <span class="kicker">Camino 07 · IoT & Embebidos</span>
+        <h3 style="font-size:clamp(22px,2.2vw,32px); margin-top:8px">Código que toca el mundo real</h3>
+        <p style="margin-top:12px">Programas el cerebro de carros, drones, electrodomésticos y dispositivos médicos. Software + hardware.</p>
+        <div class="tag-row" style="margin-top:16px"><span class="tag">C / C++</span><span class="tag">Arduino</span><span class="tag">Rust</span><span class="tag">Raspberry Pi</span></div>
+        <p class="pay">Roles: Embedded Dev · Firmware · IoT Engineer</p>
+      </div>
+      <div class="card">
+        <i data-lucide="flask-conical" class="ico"></i>
+        <span class="kicker">Camino 08 · QA & Testing</span>
+        <h3 style="font-size:clamp(22px,2.2vw,32px); margin-top:8px">El guardián de la calidad</h3>
+        <p style="margin-top:12px">Automatizas pruebas para que nada se rompa. Una de las <span class="hl">mejores puertas de entrada</span> al sector.</p>
+        <div class="tag-row" style="margin-top:16px"><span class="tag">Selenium</span><span class="tag">Cypress</span><span class="tag">Playwright</span></div>
+        <p class="pay">Roles: QA Automation · SDET · QA Lead</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · DBA + BLOCKCHAIN + XR -->
+  <section class="slide" data-title="DBA, Blockchain y XR">
+    <span class="kicker reveal">Caminos 09 · 10 · 11</span>
+    <h2 class="reveal" style="font-size:clamp(26px,3.4vw,46px); margin-top:14px; margin-bottom:26px">Y las fronteras más nuevas</h2>
+    <div class="grid g3 reveal">
+      <div class="card"><i data-lucide="database" class="ico"></i><h3>Bases de Datos / DBA</h3><p>Diseñas y proteges el activo más valioso de cualquier empresa: sus datos.</p><div class="roles">SQL · NoSQL · Data Architect</div></div>
+      <div class="card"><i data-lucide="link" class="ico"></i><h3>Blockchain / Web3</h3><p>Contratos inteligentes y aplicaciones sin intermediarios.</p><div class="roles">Solidity · Smart Contracts</div></div>
+      <div class="card"><i data-lucide="glasses" class="ico"></i><h3>AR / VR / XR</h3><p>Experiencias inmersivas para educación, industria y salud.</p><div class="roles">Unity · Unreal · WebXR</div></div>
+    </div>
+  </section>
+
+  <!-- 13 · PREGUNTA AL AIRE #2 -->
+  <section class="slide ask" data-title="Pregunta · ¿cuál te hizo clic?">
+    <span class="kicker ico-tag reveal"><i data-lucide="megaphone" class="ki"></i> Pregunta a la sala</span>
+    <h2 class="ask-q reveal">De todos estos caminos…<br><span class="hl">¿cuál te hizo clic?</span></h2>
+    <div class="ask-hint reveal"><i data-lucide="hand"></i> Piénsalo 5 segundos… avanza para la clave</div>
+    <p class="ask-answer frag">No tienes que decidirlo hoy. Solo necesitas saber que <strong style="color:var(--text)">existen</strong> y que tu base te sirve para cualquiera de ellos.</p>
+  </section>
+
+  <!-- 14 · SECCIÓN 02 -->
+  <section class="slide" data-title="Sección 2 · Emprender">
+    <span class="section-num reveal">02</span>
+    <h2 class="reveal" style="font-size:clamp(34px,5.4vw,80px); margin-top:-10px">No solo empleo:<br><span class="hl">negocio</span>.</h2>
+    <p class="lead reveal" style="margin-top:20px">Un desarrollador no solo busca trabajo. Puede <span class="hl-box">crear el suyo</span> — y el de otros.</p>
+  </section>
+
+  <!-- 15 · SALIDAS DE NEGOCIO -->
+  <section class="slide" data-title="Salidas de negocio">
+    <span class="kicker reveal">Modo emprendedor</span>
+    <h2 class="reveal" style="font-size:clamp(26px,3.6vw,48px); margin-top:14px; margin-bottom:26px">Tu código, tu empresa</h2>
+    <div class="grid g3 reveal">
+      <div class="card"><i data-lucide="laptop" class="ico"></i><h3>Freelance</h3><p>Vendes tus servicios al mundo entero. Clientes en dólares desde tu casa.</p></div>
+      <div class="card"><i data-lucide="package" class="ico"></i><h3>SaaS / Micro-SaaS</h3><p>Creas un producto una vez y cobras suscripción mientras duermes.</p></div>
+      <div class="card"><i data-lucide="building-2" class="ico"></i><h3>Agencia de software</h3><p>Montas un equipo y desarrollas para varias empresas.</p></div>
+      <div class="card"><i data-lucide="app-window" class="ico"></i><h3>Apps y juegos propios</h3><p>Monetizas con publicidad, compras o venta directa.</p></div>
+      <div class="card"><i data-lucide="graduation-cap" class="ico"></i><h3>Contenido & educación</h3><p>Enseñas lo que sabes: cursos, YouTube, mentorías.</p></div>
+      <div class="card"><i data-lucide="puzzle" class="ico"></i><h3>Consultoría & Open Source</h3><p>Asesoras empresas o vives de proyectos con patrocinio.</p></div>
+    </div>
+  </section>
+
+  <!-- 16 · PLATAFORMAS FREELANCE -->
+  <section class="slide" data-title="Dónde conseguir clientes freelance">
+    <span class="kicker reveal">Empieza a facturar</span>
+    <h2 class="reveal" style="font-size:clamp(26px,3.6vw,48px); margin-top:14px; margin-bottom:26px">Dónde conseguir tus primeros clientes</h2>
+    <div class="grid g3 reveal" style="gap:20px 34px">
+      <div class="plat"><div class="pico"><i data-lucide="briefcase"></i></div><div><div class="pt">Upwork</div><div class="pd">El marketplace freelance más grande del mundo. Clientes globales.</div></div></div>
+      <div class="plat"><div class="pico"><i data-lucide="store"></i></div><div><div class="pt">Fiverr</div><div class="pd">Empaquetas tu servicio como “gig” y los clientes te compran.</div></div></div>
+      <div class="plat"><div class="pico"><i data-lucide="map-pin"></i></div><div><div class="pt">Workana <b>· LatAm</b></div><div class="pd">El favorito en Latinoamérica y en español. Ideal para arrancar.</div></div></div>
+      <div class="plat"><div class="pico"><i data-lucide="gavel"></i></div><div><div class="pt">Freelancer.com</div><div class="pd">Proyectos por concurso y puja. Mucho volumen y variedad.</div></div></div>
+      <div class="plat"><div class="pico"><i data-lucide="award"></i></div><div><div class="pt">Toptal <b>· élite</b></div><div class="pd">Prueba dura de entrada, pero tarifas altísimas. La meta a mediano plazo.</div></div></div>
+      <div class="plat"><div class="pico"><i data-lucide="git-branch"></i></div><div><div class="pt">GitHub + LinkedIn</div><div class="pd">Tu portafolio y tu red. Muchos clientes llegan sin plataforma de por medio.</div></div></div>
+    </div>
+    <p class="lead reveal" style="margin-top:26px; font-size:clamp(14px,1.2vw,18px)"><i data-lucide="lightbulb" class="ico-inline"></i>Un buen perfil con 2–3 proyectos reales vale más que cualquier hoja de vida.</p>
+  </section>
+
+  <!-- 17 · EMPLEO MIENTRAS ESTUDIAS -->
+  <section class="slide" data-title="Gana experiencia desde ya">
+    <span class="kicker reveal">No esperes a graduarte</span>
+    <h2 class="reveal" style="font-size:clamp(26px,3.6vw,48px); margin-top:14px; margin-bottom:24px">Empieza a trabajar <span class="hl">mientras estudias</span></h2>
+    <div class="grid g4 reveal" style="gap:16px">
+      <div class="card"><i data-lucide="graduation-cap" class="ico"></i><h3>Contrato de aprendizaje</h3><p>Tu etapa productiva del SENA ES tu primer empleo formal. Aprovéchala al máximo.</p></div>
+      <div class="card"><i data-lucide="git-pull-request" class="ico"></i><h3>Open source</h3><p>Contribuye en GitHub: experiencia real, portafolio y visibilidad mundial.</p></div>
+      <div class="card"><i data-lucide="trophy" class="ico"></i><h3>Hackathons & retos</h3><p>Devpost y eventos locales: premios, aprendizaje y contactos que abren puertas.</p></div>
+      <div class="card"><i data-lucide="handshake" class="ico"></i><h3>Primeros clientes</h3><p>Negocios locales, familiares, conocidos. Tu primer “sí” cambia todo.</p></div>
+      <div class="card"><i data-lucide="laptop" class="ico"></i><h3>Junior / Trainee remoto</h3><p>Muchas empresas contratan estudiantes. Busca en LinkedIn y Torre (LatAm).</p></div>
+      <div class="card"><i data-lucide="badge-check" class="ico"></i><h3>Becas & programas</h3><p>MinTIC, Platzi, Google Developers. Formación gratis y certificada.</p></div>
+      <div class="card"><i data-lucide="package" class="ico"></i><h3>Vende algo pequeño</h3><p>Plantillas, bots, plugins o mini-apps. Ingresos con lo que ya sabes.</p></div>
+      <div class="card"><i data-lucide="users" class="ico"></i><h3>Comunidades</h3><p>Discord y meetups de devs: aquí se enteran de las vacantes antes que nadie.</p></div>
+    </div>
+  </section>
+
+  <!-- 18 · LA VENTAJA INJUSTA -->
+  <section class="slide" data-title="La ventaja del dev">
+    <div class="split">
+      <div>
+        <span class="kicker reveal">La ventaja injusta</span>
+        <h2 class="reveal" style="font-size:clamp(28px,3.8vw,52px); margin-top:16px">Ningún negocio<br>cuesta tan poco<br>de <span class="hl">arrancar</span></h2>
+        <p class="lead reveal" style="margin-top:22px">Un panadero necesita horno, local y harina. Tú necesitas <span class="hl-box">un computador y tus ideas</span>. Esa es tu ventaja injusta.</p>
+      </div>
+      <div class="reveal">
+        <div class="grid g2" style="gap:16px">
+          <div class="stat"><div class="num">$0</div><div class="lbl">de inventario para empezar</div></div>
+          <div class="stat"><div class="num">24/7</div><div class="lbl">tu producto vende sin ti</div></div>
+          <div class="stat"><div class="num"><i data-lucide="globe"></i></div><div class="lbl">tu mercado es el planeta</div></div>
+          <div class="stat"><div class="num">∞</div><div class="lbl">escala sin costo por copia</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 · SECCIÓN 03 -->
+  <section class="slide" data-title="Sección 3 · La IA">
+    <span class="section-num reveal">03</span>
+    <h2 class="reveal" style="font-size:clamp(34px,5.4vw,80px); margin-top:-10px">¿Y la <span class="hl">IA</span>?</h2>
+    <p class="lead reveal" style="margin-top:20px">Hablemos de frente del elefante en la sala.</p>
+  </section>
+
+  <!-- 20 · PREGUNTA AL AIRE #3 -->
+  <section class="slide ask" data-title="Pregunta · ¿la IA te preocupa?">
+    <span class="kicker ico-tag reveal"><i data-lucide="megaphone" class="ki"></i> Pregunta a la sala</span>
+    <h2 class="ask-q reveal">Con toda honestidad:<br>¿a quién le preocupa<br>que la IA lo <span class="hl">reemplace</span>?</h2>
+    <div class="ask-hint reveal"><i data-lucide="hand"></i> No hay vergüenza en levantar la mano… ahora avanza</div>
+    <p class="ask-answer frag">La IA no te reemplaza. <strong style="color:var(--text)">Te potencia.</strong> Es el mejor exoesqueleto que un programador ha tenido jamás.</p>
+  </section>
+
+  <!-- 21 · LA VERDAD SOBRE LA IA -->
+  <section class="slide" data-title="La IA te potencia">
+    <span class="kicker reveal">Sin miedo</span>
+    <h2 class="reveal big-quote" style="margin-top:24px">La IA es tu<br><span class="hl">copiloto</span>, no<br>tu reemplazo.</h2>
+    <p class="lead reveal" style="margin-top:30px">Escribes más código, más rápido y con menos errores. Pero <strong style="color:var(--text)">alguien tiene que dirigirla, entender el problema y decidir el rumbo</strong>. Ese alguien eres tú.</p>
+  </section>
+
+  <!-- 22 · QUIÉN HACE QUÉ -->
+  <section class="slide" data-title="Quién hace qué">
+    <span class="kicker reveal">El reparto de tareas</span>
+    <h2 class="reveal" style="font-size:clamp(24px,3.2vw,42px); margin-top:14px; margin-bottom:24px">Quién hace qué</h2>
+    <div class="vs reveal">
+      <div class="col good">
+        <h3><i data-lucide="bot" class="ico-inline"></i>La IA es buenísima en…</h3>
+        <ul>
+          <li>Escribir código repetitivo</li>
+          <li>Explicar y documentar</li>
+          <li>Encontrar bugs comunes</li>
+          <li>Autocompletar y acelerar</li>
+          <li>Darte un primer borrador</li>
+        </ul>
+      </div>
+      <div class="mid">pero…</div>
+      <div class="col good">
+        <h3><i data-lucide="brain" class="ico-inline"></i>Solo tú puedes…</h3>
+        <ul>
+          <li>Entender el problema real del cliente</li>
+          <li>Decidir la arquitectura correcta</li>
+          <li>Poner criterio y ética</li>
+          <li>Responsabilizarte del resultado</li>
+          <li>Conectar negocio + personas + código</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 23 · REGLA DE ORO -->
+  <section class="slide" data-title="La regla de oro">
+    <span class="kicker reveal">La frase para tatuarse</span>
+    <h2 class="reveal big-quote" style="margin-top:26px; max-width:26ch">La IA no te va a<br>quitar el trabajo.<br>Te lo va a quitar <span class="hl">otro dev<br>que sí sabe usarla.</span></h2>
+    <p class="lead reveal" style="margin-top:30px">La jugada no es competir contra la IA. Es <span class="hl-box">volverte imparable con ella</span>.</p>
+  </section>
+
+  <!-- 24 · NUEVAS PROFESIONES -->
+  <section class="slide" data-title="Empleos que creó la IA">
+    <span class="kicker reveal">Bonus · La IA también crea empleos</span>
+    <h2 class="reveal" style="font-size:clamp(26px,3.6vw,48px); margin-top:14px; margin-bottom:26px">Perfiles que no existían hace 3 años</h2>
+    <div class="grid g4 reveal">
+      <div class="card"><i data-lucide="brain" class="ico"></i><h3>AI Engineer</h3><p>Construye productos sobre modelos de IA.</p></div>
+      <div class="card"><i data-lucide="message-square-code" class="ico"></i><h3>Prompt Engineer</h3><p>Diseña instrucciones que sacan lo mejor de la IA.</p></div>
+      <div class="card"><i data-lucide="settings-2" class="ico"></i><h3>MLOps Engineer</h3><p>Opera y mantiene modelos en producción.</p></div>
+      <div class="card"><i data-lucide="blocks" class="ico"></i><h3>AI Product Builder</h3><p>Crea apps completas apalancado en IA.</p></div>
+    </div>
+    <p class="lead reveal" style="margin-top:26px; font-size:clamp(15px,1.3vw,19px)">Cada revolución <span class="hl">destruye tareas, pero crea profesiones</span>. Y las nuevas pagan mejor.</p>
+  </section>
+
+  <!-- 25 · SECCIÓN 04 -->
+  <section class="slide" data-title="Sección 4 · Tu plan">
+    <span class="section-num reveal">04</span>
+    <h2 class="reveal" style="font-size:clamp(34px,5.4vw,80px); margin-top:-10px">¿Y ahora<br>qué <span class="hl">hago</span>?</h2>
+    <p class="lead reveal" style="margin-top:20px">Sales de aquí con un plan, no solo con motivación.</p>
+  </section>
+
+  <!-- 26 · HABILIDADES -->
+  <section class="slide" data-title="El combo ganador">
+    <span class="kicker reveal">El combo ganador</span>
+    <h2 class="reveal" style="font-size:clamp(26px,3.6vw,48px); margin-top:14px; margin-bottom:26px">Lo técnico abre la puerta, lo humano te hace crecer</h2>
+    <div class="grid g2 reveal">
+      <div class="card">
+        <h3 class="skill-head"><i data-lucide="zap" class="ico-inline"></i>Técnicas (Hard skills)</h3>
+        <ul class="bullets" style="margin-top:16px; gap:12px">
+          <li>Domina <strong>una</strong> especialidad a fondo</li>
+          <li>Fundamentos sólidos: lógica, datos, algoritmos</li>
+          <li>Git, bases de datos y una nube</li>
+          <li>Usar IA como herramienta diaria</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="skill-head"><i data-lucide="heart-handshake" class="ico-inline"></i>Humanas (Soft skills)</h3>
+        <ul class="bullets" style="margin-top:16px; gap:12px">
+          <li>Comunicar ideas técnicas con claridad</li>
+          <li>Trabajo en equipo y feedback</li>
+          <li>Aprender a aprender (para siempre)</li>
+          <li>Inglés: multiplica tu salario y tu mundo</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 27 · ROADMAP -->
+  <section class="slide" data-title="Tu plan de acción">
+    <span class="kicker reveal">Empieza esta semana</span>
+    <h2 class="reveal" style="font-size:clamp(26px,3.6vw,48px); margin-top:14px; margin-bottom:30px">Tu plan de acción</h2>
+    <div class="grid g2 reveal" style="gap:24px 48px">
+      <div class="step"><div class="n">1</div><div><h3>Explora y elige</h3><p>Prueba 2 o 3 caminos. Quédate con el que te enganche, no con el que “paga más”.</p></div></div>
+      <div class="step"><div class="n">2</div><div><h3>Construye un portafolio</h3><p>Proyectos reales &gt; certificados. Que se vea lo que sabes hacer, en GitHub.</p></div></div>
+      <div class="step"><div class="n">3</div><div><h3>Hazte visible</h3><p>LinkedIn, comunidades y networking. El primer empleo casi siempre llega por una persona.</p></div></div>
+      <div class="step"><div class="n">4</div><div><h3>Nunca dejes de aprender</h3><p>30 minutos al día te vuelven imparable en un año. La constancia gana.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 28 · CIERRE -->
+  <section class="slide cover" data-title="Cierre">
+    <span class="kicker reveal">El mensaje final</span>
+    <h2 class="reveal big-quote" style="margin-top:26px; font-size:clamp(34px,6.4vw,96px); max-width:16ch">No estudiaste<br>una carrera.<br>Estudiaste un <span class="hl">superpoder.</span></h2>
+    <p class="lead reveal" style="margin-top:30px">El mundo necesita más de lo que sabes hacer, no menos. La era de la IA no es el fin del desarrollador — es <span class="hl-box">tu mejor momento</span> para empezar.</p>
+    <p class="cover-foot reveal" style="margin-top:38px">Ahora ve y construye algo. <span class="hl">El teclado es tuyo.</span></p>
+  </section>
+
+</div>
+
+<!-- HUD -->
+<div class="brand"><span class="dot"></span> ADSO · SENA</div>
+<div class="hud">
+  <span class="counter"><b id="cur">1</b> / <span id="total">28</span></span>
+  <div class="nav-btns">
+    <button id="prev" aria-label="Anterior"><i data-lucide="arrow-left"></i></button>
+    <button id="next" aria-label="Siguiente"><i data-lucide="arrow-right"></i></button>
+  </div>
+</div>
+
+<!-- Vista general -->
+<div class="overview" id="overview">
+  <h2>Índice de la presentación <span style="color:var(--text-mute); font-weight:400; font-size:14px">— clic para saltar · Esc para cerrar</span></h2>
+  <div class="ov-grid" id="ovGrid"></div>
+</div>
+
+<script src="lucide.min.js"></script>
+<script>
+  if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total  = slides.length;
+  let idx = 0;
+  let fragIndex = 0;
+
+  const progress = document.getElementById('progress');
+  const curEl    = document.getElementById('cur');
+  const totalEl  = document.getElementById('total');
+  const overview = document.getElementById('overview');
+  const ovGrid   = document.getElementById('ovGrid');
+  totalEl.textContent = total;
+
+  const fragsOf = s => s.querySelectorAll('.frag');
+
+  function applyFrags(slide, count) {
+    fragsOf(slide).forEach((f, i) => f.classList.toggle('shown', i < count));
+  }
+
+  function render() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    applyFrags(slides[idx], fragIndex);
+    progress.style.width = ((idx + 1) / total * 100) + '%';
+    curEl.textContent = idx + 1;
+    location.hash = 's' + (idx + 1);
+  }
+
+  function next() {
+    const frags = fragsOf(slides[idx]);
+    if (fragIndex < frags.length) { fragIndex++; applyFrags(slides[idx], fragIndex); return; }
+    if (idx < total - 1) { idx++; fragIndex = 0; render(); }
+  }
+  function prev() {
+    if (fragIndex > 0) { fragIndex--; applyFrags(slides[idx], fragIndex); return; }
+    if (idx > 0) { idx--; fragIndex = fragsOf(slides[idx]).length; render(); }
+  }
+  function go(n) { idx = Math.max(0, Math.min(total - 1, n)); fragIndex = fragsOf(slides[idx]).length; render(); }
+
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+
+  document.addEventListener('keydown', (e) => {
+    if (overview.classList.contains('show')) {
+      if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') toggleOverview();
+      return;
+    }
+    switch (e.key) {
+      case 'ArrowRight': case ' ': case 'PageDown': case 'Enter': e.preventDefault(); next(); break;
+      case 'ArrowLeft':  case 'PageUp': case 'Backspace': e.preventDefault(); prev(); break;
+      case 'Home': go(0); break;
+      case 'End':  go(total - 1); break;
+      case 'f': case 'F': toggleFullscreen(); break;
+      case 'o': case 'O': toggleOverview(); break;
+    }
+  });
+
+  let tx = 0;
+  document.addEventListener('touchstart', e => tx = e.changedTouches[0].clientX, {passive:true});
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) (dx < 0 ? next : prev)();
+  }, {passive:true});
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+
+  slides.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'ov-item';
+    item.innerHTML = `<div class="oi-n">${String(i+1).padStart(2,'0')}</div><div class="oi-t">${s.dataset.title || 'Slide'}</div>`;
+    item.onclick = () => { go(i); toggleOverview(); };
+    ovGrid.appendChild(item);
+  });
+  function toggleOverview() { overview.classList.toggle('show'); }
+
+  const h = parseInt((location.hash.match(/\d+/) || [1])[0], 10);
+  if (h >= 1 && h <= total) idx = h - 1;
+  fragIndex = fragsOf(slides[idx]).length;
+  render();
+</script>
+</body>
+</html>
